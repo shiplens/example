@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -23,6 +24,7 @@ func TestHandleJSON(t *testing.T) {
 	h.ServeHTTP(w, r)
 
 	assert.Equal(t, 200, w.Code)
+	assert.Equal(t, fmt.Sprintf("example/%s", gitSHA), w.Header().Get("Server"))
 	assert.Equal(t, "application/json", w.Header().Get("Content-Type"))
 
 	expected := map[string]map[string]string{

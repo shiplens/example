@@ -32,9 +32,17 @@ func main() {
 func serveMux() *http.ServeMux {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/json", handleJSON)
+	mux.HandleFunc("/json", middleware(handleJSON))
 
 	return mux
+}
+
+func middleware(next http.HandlerFunc) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Server", fmt.Sprintf("example/%s", gitSHA))
+
+		next.ServeHTTP(w, r)
+	})
 }
 
 func handleJSON(w http.ResponseWriter, r *http.Request) {
