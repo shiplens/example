@@ -3,9 +3,11 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"runtime/debug"
 )
 
@@ -32,6 +34,7 @@ func main() {
 func serveMux() *http.ServeMux {
 	mux := http.NewServeMux()
 
+	mux.HandleFunc("/", middleware(handleRoot))
 	mux.HandleFunc("/json", middleware(handleJSON))
 
 	return mux
@@ -43,6 +46,29 @@ func middleware(next http.HandlerFunc) http.HandlerFunc {
 
 		next.ServeHTTP(w, r)
 	})
+}
+
+func handleRoot(w http.ResponseWriter, r *http.Request) {
+	f := filepath.Join("templates", "root.html")
+	tmpl, err := template.ParseFiles(f)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = tmpl.Execute(w, struct {
+		GitSHA  string
+		ISO8601 string
+	}{
+		GitSHA:  gitSHA,
+		ISO8601: timestamp,
+	})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	return
 }
 
 func handleJSON(w http.ResponseWriter, r *http.Request) {

@@ -16,6 +16,18 @@ func init() {
 	timestamp = "2022-01-01T00:00:00Z"
 }
 
+func TestHandleRoot(t *testing.T) {
+	h := serveMux()
+
+	w := httptest.NewRecorder()
+	r, _ := http.NewRequest("GET", "/", nil)
+	h.ServeHTTP(w, r)
+
+	assert.Equal(t, 200, w.Code)
+	assert.Equal(t, fmt.Sprintf("example/%s", gitSHA), w.Header().Get("Server"))
+	assert.Equal(t, "text/html; charset=utf-8", w.Header().Get("Content-Type"))
+}
+
 func TestHandleJSON(t *testing.T) {
 	h := serveMux()
 
