@@ -1,15 +1,18 @@
 package main
 
 import (
+	"embed"
 	"encoding/json"
 	"fmt"
 	"html/template"
 	"log"
 	"net/http"
 	"os"
-	"path/filepath"
 	"runtime/debug"
 )
+
+//go:embed templates/*
+var content embed.FS
 
 var (
 	port = "8080"
@@ -49,8 +52,7 @@ func middleware(next http.HandlerFunc) http.HandlerFunc {
 }
 
 func handleRoot(w http.ResponseWriter, r *http.Request) {
-	f := filepath.Join("templates", "root.html")
-	tmpl, err := template.ParseFiles(f)
+	tmpl, err := template.ParseFS(content, "templates/*")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
