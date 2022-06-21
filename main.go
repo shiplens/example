@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"runtime/debug"
+	"strings"
 )
 
 //go:embed templates/*
@@ -58,10 +59,14 @@ func handleRoot(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	host := strings.SplitN(r.Host, ":", 2)[0]
+
 	err = tmpl.Execute(w, struct {
+		Host    string
 		GitSHA  string
 		ISO8601 string
 	}{
+		Host:    host,
 		GitSHA:  gitSHA,
 		ISO8601: timestamp,
 	})
